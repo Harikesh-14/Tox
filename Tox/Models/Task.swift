@@ -10,6 +10,7 @@ import SwiftData
 
 @Model
 final class Task {
+    var id: String
     var title: String
     var desc: String
     var dateAndTime: Date
@@ -17,6 +18,7 @@ final class Task {
     var isImportant: Bool
     
     init(title: String = "", desc: String = "", dateAndTime: Date = .now, isCompleted: Bool = false, isImportant: Bool = false) {
+        self.id = UUID().uuidString
         self.title = title
         self.desc = desc
         self.dateAndTime = dateAndTime

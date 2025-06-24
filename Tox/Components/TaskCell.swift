@@ -10,7 +10,9 @@ import SwiftUI
 struct TaskCell: View {
     @Bindable var task: Task
     @Environment(\.modelContext) var modelContext
+    @Environment(\.dismiss) var dismiss
     @State private var isSheetPresented: Bool = false
+    @State private var isLongPressSheetPresented: Bool = false
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -29,21 +31,35 @@ struct TaskCell: View {
                     
                     Text (task.desc)
                         .foregroundStyle(.secondary)
+                        .lineLimit(2)
                 }
                 .fontDesign(.rounded)
                 
                 Spacer()
                 
-                Button {
-                    // Edit task button function
-                    isSheetPresented = true
+                HStack (spacing: 10) {
+                    // Edit button
+                    Button {
+                        // Edit task button function
+                        isSheetPresented = true
+                        
+                    } label: {
+                        Image(systemName: "applepencil.gen1")
+                            .font(.title2)
+                    }
                     
-                } label: {
-                    Image(systemName: "applepencil.gen1")
-                        .foregroundColor(.primary)
-                        .font(.title)
-                        .fontWeight(.bold)
+                    // Delete button
+                    Button {
+                        NotificationManager.shared.cancelNotification(for: task.id)
+                        modelContext.delete(task)
+                        try? modelContext.save()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.headline)
+                    }
                 }
+                .foregroundColor(.primary)
+                .fontWeight(.bold)
             }
             
             HStack {
@@ -58,8 +74,12 @@ struct TaskCell: View {
                     .font(.footnote)
                     .fontWeight(.semibold)
                     .foregroundStyle(task.isCompleted ? .green : .primary)
-                    .onTapGesture {
-                        task.isCompleted.toggle()
+                    .onChange(of: task.isCompleted) {
+                        if task.isCompleted {
+                            NotificationManager.shared.cancelNotification(for: task.id)
+                        } else {
+                            NotificationManager.shared.scheduleNotification(title: task.title, deadline: task.dateAndTime, id: task.id)
+                        }
                         try? modelContext.save()
                     }
             }
@@ -75,6 +95,12 @@ struct TaskCell: View {
         )
         .padding(.horizontal)
         .padding(.vertical, 10)
+        .onLongPressGesture {
+            isLongPressSheetPresented = true
+        }
+        .sheet(isPresented: $isLongPressSheetPresented) {
+            TaskSheet(task: task)
+        }
     }
 }
 
@@ -82,7 +108,7 @@ struct TaskCell: View {
     TaskCell(
         task: Task(
             title: "Workout",
-            desc: "Complete 30-minute yoga session",
+            desc: "The golden sun dipped behind the hills, casting long shadows across the quiet meadow. A soft breeze carried the scent of blooming jasmine, while birds chirped their final songs of the day. Emma sat beneath the old oak tree, her fingers brushing the petals of a daisy, lost in thought. The world felt still, peaceful — as if time itself had paused just for her.",
             dateAndTime: Date(),
             isCompleted: false
         )

@@ -26,6 +26,9 @@ struct ToxApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    NotificationManager.shared.requestPermission()
+                }
         }
         .modelContainer(sharedModelContainer)
     }

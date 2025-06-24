@@ -14,24 +14,23 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.gray.opacity(0.15)
-                    .ignoresSafeArea(.all)
-                
-                ScrollView (showsIndicators: false) {
-                    VStack (alignment: .leading) {
+            if tasks.isEmpty {
+                ZStack {
+                    Color.gray.opacity(0.15).ignoresSafeArea()
+                    NoTaskView()
+                }
+            } else {
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 16) {
                         Text("Hello, Harikesh 👋🏻")
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .padding(.horizontal, 24)
                         
-                        ForEach (tasks) { task in
-                            VStack {
-                                TaskCell(
-                                    task: task
-                                )
-                            }
+                        ForEach(tasks) { task in
+                            TaskCell(task: task)
                         }
                     }
+                    .padding(.top, 32)
                 }
             }
         }

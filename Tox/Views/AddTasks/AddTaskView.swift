@@ -98,6 +98,13 @@ struct AddTaskView: View {
                             )
                             
                             modelContext.insert(newTask)
+                            
+                            NotificationManager.shared.scheduleNotification(
+                                title: taskTitle,
+                                deadline: taskDate,
+                                id: newTask.id
+                            )
+                            
                             taskTitle = ""
                             taskDesc = ""
                             taskDate = Date()
